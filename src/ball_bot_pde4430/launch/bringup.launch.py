@@ -2,29 +2,29 @@ from launch import LaunchDescription
 from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-import os
 import xacro
+import os
 
 def generate_launch_description():
 
-    pkg_share = get_package_share_directory('ball_bot_pde4430')
+    pkg = get_package_share_directory('ball_bot_pde4430')
 
-    # World file
-    world_path = os.path.join(pkg_share, 'worlds', 'default_world.sdf')
+    # WORLD
+    world_path = os.path.join(pkg, 'worlds', 'default_world.sdf')
 
-    # XACRO -> URDF on the fly
-    xacro_file = os.path.join(pkg_share, 'urdf', 'ball_bot.xacro')
+    # Load Xacro robot
+    xacro_file = os.path.join(pkg, 'urdf', 'ball_bot.xacro')
     robot_description = xacro.process_file(xacro_file).toxml()
 
     return LaunchDescription([
 
-        # Launch Gazebo Harmonic with the world
+        # 1) Launch Gazebo world (server + gui together)
         ExecuteProcess(
-            cmd=['gz', 'sim', world_path],
+            cmd=['gz', 'sim', '-v', '4', world_path],
             output='screen'
         ),
 
-        # Robot state publisher (publishes TF + robot_description)
+        # 2) Publish TF + robot_description
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
@@ -32,12 +32,13 @@ def generate_launch_description():
             output='screen'
         ),
 
-        # Spawn robot into Gazebo using the robot_description topic
+        # 3) Spawn robot into this SAME Gazebo instance
         ExecuteProcess(
             cmd=[
                 'ros2', 'run', 'ros_gz_sim', 'create',
                 '-name', 'ball_bot',
-                '-topic', 'robot_description'
+                '-topic', 'robot_description',
+                '-z', '0.05'
             ],
             output='screen'
         ),
