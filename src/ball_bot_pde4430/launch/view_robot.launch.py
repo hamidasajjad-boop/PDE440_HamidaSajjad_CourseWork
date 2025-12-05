@@ -1,31 +1,40 @@
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
-import xacro
 import os
+import xacro
 
 def generate_launch_description():
 
-    pkg_share = get_package_share_directory('ball_bot_pde4430')
-    xacro_path = os.path.join(pkg_share, 'urdf', 'ball_bot.xacro')
+    pkg_path = get_package_share_directory('ball_bot_pde4430')
+    xacro_file = os.path.join(pkg_path, 'urdf', 'ball_bot.xacro')
 
-    robot_description = xacro.process_file(xacro_path).toxml()
+    # Convert XACRO → URDF
+    robot_description_raw = xacro.process_file(xacro_file).toxml()
 
     return LaunchDescription([
-        
+
+        # Joint State Publisher GUI
         Node(
             package='joint_state_publisher_gui',
-            executable='joint_state_publisher_gui'
+            executable='joint_state_publisher_gui',
+            name='joint_state_publisher_gui'
         ),
 
+        # Robot State Publisher (publishes TF + robot_description)
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
-            parameters=[{'robot_description': robot_description}]
+            name='robot_state_publisher',
+            parameters=[{'robot_description': robot_description_raw}],
+            output='screen'
         ),
 
+        # RViz
         Node(
             package='rviz2',
-            executable='rviz2'
+            executable='rviz2',
+            name='rviz2',
+            arguments=['-d', os.path.join(pkg_path, 'urdf', 'robot_view.rviz')]
         )
     ])

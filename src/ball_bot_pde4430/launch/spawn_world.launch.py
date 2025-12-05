@@ -10,7 +10,11 @@ def generate_launch_description():
 
     return LaunchDescription([
         ExecuteProcess(
-            cmd=['gz', 'sim', world_path],
+            cmd=[
+                'gz', 'sim',
+                '--render-engine', 'ogre',    # <<< FIX: FORCE OGRE RENDERER
+                world_path
+            ],
             output='screen'
         )
     ])

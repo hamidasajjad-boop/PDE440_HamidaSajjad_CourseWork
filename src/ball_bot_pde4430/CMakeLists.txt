@@ -4,6 +4,15 @@ project(ball_bot_pde4430)
 find_package(ament_cmake REQUIRED)
 find_package(xacro REQUIRED)
 
-# No xacro build step needed — xacro is processed at runtime in launch file
+# Generate URDF from XACRO
+xacro_add_files(
+  urdf/ball_bot.xacro
+  INSTALL_DESTINATION share/${PROJECT_NAME}/urdf
+)
+
+install(
+  DIRECTORY launch urdf worlds
+  DESTINATION share/${PROJECT_NAME}
+)
 
 ament_package()

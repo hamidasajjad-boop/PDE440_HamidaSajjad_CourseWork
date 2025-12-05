@@ -9,12 +9,12 @@ def generate_launch_description():
 
     pkg_share = get_package_share_directory('ball_bot_pde4430')
 
+    # Convert XACRO → robot_description
     xacro_file = os.path.join(pkg_share, 'urdf', 'ball_bot.xacro')
     robot_description = xacro.process_file(xacro_file).toxml()
 
     return LaunchDescription([
 
-        # Publish robot_description + TF
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
@@ -22,12 +22,12 @@ def generate_launch_description():
             output='screen'
         ),
 
-        # Spawn robot using ros_gz_sim
         ExecuteProcess(
             cmd=[
                 'ros2', 'run', 'ros_gz_sim', 'create',
                 '-name', 'ball_bot',
-                '-topic', 'robot_description'
+                '-topic', 'robot_description',
+                '-z', '0.05'
             ],
             output='screen'
         ),

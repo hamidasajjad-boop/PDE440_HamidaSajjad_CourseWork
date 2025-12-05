@@ -18,9 +18,14 @@ def generate_launch_description():
 
     return LaunchDescription([
 
-        # 1) Launch Gazebo world (server + gui together)
+        # 1) Launch Gazebo with OGRE renderer
         ExecuteProcess(
-            cmd=['gz', 'sim', '-v', '4', world_path],
+            cmd=[
+                'gz', 'sim',
+                '--render-engine', 'ogre',   # <<< FIX: use OGRE renderer
+                '-v', '4',
+                world_path
+            ],
             output='screen'
         ),
 
@@ -32,7 +37,7 @@ def generate_launch_description():
             output='screen'
         ),
 
-        # 3) Spawn robot into this SAME Gazebo instance
+        # 3) Spawn robot
         ExecuteProcess(
             cmd=[
                 'ros2', 'run', 'ros_gz_sim', 'create',
